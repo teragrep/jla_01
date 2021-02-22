@@ -1,0 +1,20 @@
+<modules xmlns="http://smartics.de/ns/jboss-modules-descriptor/1">
+  <module name="com.teragrep.jla_01">
+    <match>
+      <includes>
+        <include>
+          <groupId>com.teragrep</groupId>
+          <artifactId>jla_01</artifactId>
+        </include>
+        <include>
+          <groupId>com.teragrep</groupId>
+          <artifactId>rlp_01</artifactId>
+        </include>
+        <include>
+          <groupId>com.cloudbees</groupId>
+          <artifactId>syslog-java-client</artifactId>
+        </include>
+      </includes>
+    </match>
+  </module>
+</modules>
