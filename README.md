@@ -1,3 +1,8 @@
+<a href="https://scan.coverity.com/projects/jla_01">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/22709/badge.svg"/>
+</a>
+
 # Relp Logging plugin for Java
 
 See src/main/resources/logback.example.xml for exampe config
