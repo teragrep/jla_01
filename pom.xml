@@ -8,6 +8,7 @@
 	<artifactId>jla_01</artifactId>
         <version>${revision}${sha1}${changelist}</version>
 	<name>jla_01</name>
+	<descripotion>jla_01</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
