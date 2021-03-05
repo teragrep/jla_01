@@ -8,6 +8,8 @@
 	<artifactId>jla_01</artifactId>
         <version>${revision}${sha1}${changelist}</version>
 	<name>jla_01</name>
+	<description>A RELP plugin.</description>
+	<url>https://teragrep.com</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,6 +18,28 @@
                 <changelist>-SNAPSHOT</changelist>
                 <sha1/>
 	</properties>
+	
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	
+	<developers>
+		<developer>
+			<name>Mikko Kortelainen</name>
+			<email></email>
+			<organization>Teragrep</organization>
+			<organizationUrl>https://teragrep.com</organizationUrl>
+		</developer>
+	</developers>
+	
+	<scm>
+	  <connection>scm:git:https://github.com/teragrep/jla_01.git</connection>
+	  <developerConnection>scm:git:git@github.com:teragrep/jla_01.git</developerConnection>
+	  <url>https://github.com/teragrep/jla_01/tree/master</url>
+	</scm>
 
 	<dependencies>
 		<dependency>
