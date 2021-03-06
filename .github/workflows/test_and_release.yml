@@ -29,8 +29,5 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Package
-      run: mvn clean package
-
     - name: Verify
       run: mvn verify
