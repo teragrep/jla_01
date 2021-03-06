@@ -19,6 +19,7 @@ jobs:
 
   release:
     needs: test
+    
     name: Release
     runs-on: ubuntu-latest
 
