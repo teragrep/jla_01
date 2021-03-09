@@ -8,7 +8,7 @@
 	<artifactId>jla_01</artifactId>
         <version>${revision}${sha1}${changelist}</version>
 	<name>jla_01</name>
-	<description>jla_01</description>
+	<description>A RELP plugin.</description>
 	<url>https://teragrep.com</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
