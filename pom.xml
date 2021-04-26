@@ -122,7 +122,6 @@
 
 	<build>
 		<directory>${project.basedir}/target</directory>
-		<finalName>jla_01</finalName>
                 <plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
