@@ -165,8 +165,8 @@
                           </executions>
                           <configuration>
                             <slotStrategy>main</slotStrategy>
-                            <defaultSlot>${project.groupId}.${project.artifactId}.${project.version}</defaultSlot>
-                            <attach>${attach.archive}</attach>
+                            <defaultSlot>main</defaultSlot>
+                            <attach>true</attach>
                             <dependencyExcludes>
                               <exclude>
                                 <groupId>ch.qos.logback</groupId>
