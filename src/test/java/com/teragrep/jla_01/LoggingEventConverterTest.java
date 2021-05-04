@@ -86,7 +86,7 @@ public class LoggingEventConverterTest {
 				"");
 		LoggingEventConverter.addSDElement(sm, "event_id@48577", parameters);
 
-		String expected = "   - - [event_id@48577 hostname=\"hostname\" uuid=\"uuid\" unixtime=\"1577916000000\" source=\"source\"] log event";
+		String expected = "   - - [event_id@48577 hostname=\"hostname\" uuid=\"uuid\" unixtime=\""+ unixtime +"\" source=\"source\"] log event";
 		assertEquals(expected, sm.toRfc5424SyslogMessage().substring(30));
 		System.out.println(sm.toRfc5424SyslogMessage());
 	}
@@ -123,7 +123,7 @@ public class LoggingEventConverterTest {
 				"");
 		LoggingEventConverter.addSDElement(sm, "event_id@48577", parameters);
 
-		String expected = "   - - [event_id@48577 hostname=\"hostname\" uuid=\"uuid\" unixtime=\"1577916000000\" source=\"source\"] log event";
+		String expected = "   - - [event_id@48577 hostname=\"hostname\" uuid=\"uuid\" unixtime=\""+ unixtime +"\" source=\"source\"] log event";
 		assertEquals(expected, sm.toRfc5424SyslogMessage().substring(30));
 		System.out.println(sm.toRfc5424SyslogMessage());
 	}
