@@ -1,31 +1,28 @@
-<a href="https://scan.coverity.com/projects/jla_01">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/22709/badge.svg"/>
-</a>
+image::https://scan.coverity.com/projects/22709/badge.svg[link=https://scan.coverity.com/projects/jla_01]
 
 # Relp Logging plugin for Java
 
-See src/main/resources/logback.example.xml for exampe config
+See src/main/resources/logback.example.xml for example config
 
 ## Parameters
-- relpHostAddress
-Connection destination address
-- relpPort
-Connection destination port
-- enableEventId48577
-Enables structured data containing uuid and source information
-- appName
-Stream name
-- hostname
-Stream host
-- connectionTimeout
-Connection timeout
-- reconnectInterval
-Time to wait between re-connection attempts
-- writeTimeout
-Time to wait for destination to accept data
-- readTimeout
-Time to wait for destination to acknowledge sent data (low values cause duplicates)
+ * relpHostAddress
+ ** Connection destination address
+ * relpPort
+ ** Connection destination port
+ * enableEventId48577
+ ** Enables structured data containing uuid and source information
+ * appName
+ ** Stream application identifier. Maximum length of 48 characters, limited by RFC5424
+ * hostname
+ ** Stream host identifier. Maximum length of 255 characters, limited by RFC5424
+ * connectionTimeout
+ ** Time to wait before timing out connection
+ * reconnectInterval
+ ** Time to wait between re-connection attempts
+ * writeTimeout
+ ** Time to wait for destination to accept data
+ * readTimeout
+ ** Time to wait for destination to acknowledge sent data (low values cause duplicates)
 
 ## jboss-module
 
