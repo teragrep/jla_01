@@ -1,35 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE xml>
 <configuration>
-  <property name="applicationName" value="dummylog"
-            scope="context" />
-  <appender name="relp" class="com.teragrep.jla_01.RlpLogbackAppender">
+  <appender name="relp-appender" class="com.teragrep.jla_01.RlpLogbackAppender">
     <relpHostAddress>localhost</relpHostAddress>
-    <relpPort>1235</relpPort>
+    <relpPort>10601</relpPort>
     <enableEventId48577>true</enableEventId48577>
-    <appName>our-noisy-logger</appName>
-    <hostname>cluster.example.com</hostname>
+    <appName>log1</appName>
+    <hostname>host1.example.com</hostname>
     <connectionTimeout>5000</connectionTimeout>
-    <reconnectInterval>500</reconnectInterval>
     <writeTimeout>2000</writeTimeout>
     <readTimeout>15000</readTimeout>
     <encoder>
-      <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} xxx - %msg</pattern>
+      <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} - %msg</pattern>
     </encoder>
-    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-      <evaluator
-          class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-        <marker>DAILY</marker>
-      </evaluator>
-      <onMismatch>DENY</onMismatch>
-      <onMatch>ACCEPT</onMatch>
-    </filter>
   </appender>
-  <logger name="com.teragrep.jla_02.Logback" level="TRACE"
-          additivity="false">
-    <appender-ref ref="relp" />
-  </logger>
-  <root level="WARN">
-    <appender-ref ref="relp" />
+  <root>
+    <appender-ref ref="relp-appender" />
   </root>
 </configuration>
