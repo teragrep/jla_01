@@ -2,7 +2,7 @@ image::https://scan.coverity.com/projects/22709/badge.svg[link=https://scan.cove
 
 # Relp Logging plugin for Logback
 
-See src/main/resources/logback.example.xml for example config
+See [logback.example.xml](https://github.com/teragrep/jla_01/blob/master/src/main/resources/logback.example.xml) for example config
 
 ## Parameters
  * relpHostAddress
