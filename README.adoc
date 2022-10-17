@@ -1,6 +1,6 @@
 image::https://scan.coverity.com/projects/22709/badge.svg[link=https://scan.coverity.com/projects/jla_01]
 
-# Relp Logging plugin for Java
+# Relp Logging plugin for Logback
 
 See src/main/resources/logback.example.xml for example config
 
