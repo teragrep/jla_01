@@ -14,7 +14,7 @@
       <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} - %msg</pattern>
     </encoder>
   </appender>
-  <root>
+  <root level="INFO">
     <appender-ref ref="relp-appender" />
   </root>
 </configuration>
