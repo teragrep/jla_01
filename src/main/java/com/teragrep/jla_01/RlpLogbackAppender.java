@@ -55,6 +55,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	private int readTimeout = 0;
 	private int writeTimeout = 0;
 	private int reconnectInterval = 500;
+	private boolean keepAlive = true;
 
 	public void setEncoder(LayoutWrappingEncoder encoder) {
 		this.encoder = encoder;
@@ -108,6 +109,10 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		if (interval > 0) {
 			this.reconnectInterval = interval;
 		}
+	}
+
+	public void setKeepAlive(boolean on) {
+		this.keepAlive=on;
 	}
 
 	private void connect() {
@@ -174,6 +179,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		this.sender.setConnectionTimeout(connectionTimeout);
 		this.sender.setReadTimeout(this.readTimeout);
 		this.sender.setWriteTimeout(this.writeTimeout);
+		this.sender.setKeepAlive(this.keepAlive);
 
 		this.connect();
 		super.start();

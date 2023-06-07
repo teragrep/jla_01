@@ -23,6 +23,8 @@ See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logba
  ** Time to wait for destination to accept data
  * readTimeout
  ** Time to wait for destination to acknowledge sent data (low values cause duplicates)
+ * keepAlive
+ ** Enables sending alive packets. Default true.
 
 ## jboss-module
 

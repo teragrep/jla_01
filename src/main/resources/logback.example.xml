@@ -10,6 +10,7 @@
     <connectionTimeout>5000</connectionTimeout>
     <writeTimeout>2000</writeTimeout>
     <readTimeout>15000</readTimeout>
+    <keepAlive>true</keepAlive>
     <encoder>
       <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} - %msg</pattern>
     </encoder>
