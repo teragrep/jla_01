@@ -133,8 +133,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 				realHostname = java.net.InetAddress.getLocalHost().getHostName();
 				connected = this.sender.connect(this.relpHostAddress, this.relpPort);
 			} catch (Exception e) {
-				System.out.println("RlpLogbackAppender.connect> exception:");
-				e.printStackTrace();
+				System.out.println("RlpLogbackAppender.connect> reconnecting after <" + reconnectInterval + "> milliseconds due to exception: " + e.getMessage());
 			}
 			if (connected) {
 				notConnected = false;
@@ -142,7 +141,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 				try {
 					Thread.sleep(this.reconnectInterval);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					System.out.println("RlpLogbackAppender.connect> reconnect timer interrupted, reconnecting now");
 				}
 			}
 		}
@@ -163,8 +162,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		try {
 			disconnected = this.sender.disconnect();
 		} catch (IllegalStateException | IOException | TimeoutException e) {
-			System.out.println("RlpLogbackAppender.disconnect> exception:");
-			e.printStackTrace();
+			System.out.println("RlpLogbackAppender.disconnect> forcefully closing connection due to exception: " + e.getMessage());
 		}
 		finally {
 			this.tearDown();
@@ -242,8 +240,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 			try {
 				this.sender.commit(relpBatch);
 			} catch (IllegalStateException | IOException | java.util.concurrent.TimeoutException e) {
-				System.out.println("RlpLogbackAppender.append> exception:");
-				e.printStackTrace();
+				System.out.println("RlpLogbackAppender.append> will retry sending due to exception: " + e.getMessage());
 			}
 
 			if (!relpBatch.verifyTransactionAll()) {
