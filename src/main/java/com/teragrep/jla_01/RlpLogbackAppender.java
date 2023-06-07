@@ -55,6 +55,9 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	private int readTimeout = 0;
 	private int writeTimeout = 0;
 	private int reconnectInterval = 500;
+	private boolean keepAlive = true;
+	private long reconnectIfNoMessagesInterval = 150000;
+	private long lastMessageSent = 0;
 
 	public void setEncoder(LayoutWrappingEncoder encoder) {
 		this.encoder = encoder;
@@ -108,6 +111,14 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		if (interval > 0) {
 			this.reconnectInterval = interval;
 		}
+	}
+
+	public void setKeepAlive(boolean on) {
+		this.keepAlive=on;
+	}
+
+	public void setReconnectIfNoMessagesInterval(int interval) {
+		this.reconnectIfNoMessagesInterval = interval;
 	}
 
 	private void connect() {
@@ -174,6 +185,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		this.sender.setConnectionTimeout(connectionTimeout);
 		this.sender.setReadTimeout(this.readTimeout);
 		this.sender.setWriteTimeout(this.writeTimeout);
+		this.sender.setKeepAlive(this.keepAlive);
 
 		this.connect();
 		super.start();
@@ -219,7 +231,13 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		}
 
 		boolean notSent = true;
-
+		if (
+				reconnectIfNoMessagesInterval > 0 &&
+				System.currentTimeMillis() > (lastMessageSent + reconnectIfNoMessagesInterval)
+		) {
+			this.tearDown();
+			this.connect();
+		}
 		while (notSent) {
 			try {
 				this.sender.commit(relpBatch);
@@ -236,6 +254,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 				notSent = false;
 			}
 		}
+		lastMessageSent = System.currentTimeMillis();
 		if (System.getenv("JLA01_DEBUG") != null) {
 			System.out.println("RlpLogbackAppender.append> exit");
 		}

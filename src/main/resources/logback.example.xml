@@ -10,6 +10,8 @@
     <connectionTimeout>5000</connectionTimeout>
     <writeTimeout>2000</writeTimeout>
     <readTimeout>15000</readTimeout>
+    <keepAlive>true</keepAlive>
+    <reconnectIfNoMessagesInterval>150000</reconnectIfNoMessagesInterval>
     <encoder>
       <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} - %msg</pattern>
     </encoder>
