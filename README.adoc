@@ -25,6 +25,8 @@ See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logba
  ** Time to wait for destination to acknowledge sent data (low values cause duplicates)
  * keepAlive
  ** Enables sending alive packets. Default true.
+ * reconnectIfNoMessagesInterval
+ ** Reconnects before sending message if at least X milliseconds have passed since last message. Default 150000, set to 0 to turn off automatic reconnections.
 
 ## jboss-module
 

@@ -118,9 +118,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	}
 
 	public void setReconnectIfNoMessagesInterval(int interval) {
-		if (interval > 0) {
-			this.reconnectIfNoMessagesInterval = interval;
-		}
+		this.reconnectIfNoMessagesInterval = interval;
 	}
 
 	private void connect() {
@@ -233,7 +231,10 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		}
 
 		boolean notSent = true;
-		if (System.currentTimeMillis() > (lastMessageSent + reconnectIfNoMessagesInterval)) {
+		if (
+				reconnectIfNoMessagesInterval > 0 &&
+				System.currentTimeMillis() > (lastMessageSent + reconnectIfNoMessagesInterval)
+		) {
 			this.tearDown();
 			this.connect();
 		}
