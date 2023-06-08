@@ -55,7 +55,7 @@ https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_applicati
 
 ## Configuring pre-built Logback application
 
-First download wanted versions of jla_01, rlp_01 and syslog-java-client from the following urls:
+First download wanted versions of jla_01, rlp_01, syslog-java-client, tls-channel and slf4j from the following urls:
 
 https://search.maven.org/artifact/com.teragrep/jla_01[jla_01]
 
