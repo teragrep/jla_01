@@ -55,20 +55,12 @@ https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_applicati
 
 ## Configuring pre-built Logback application
 
-First download wanted versions of jla_01, rlp_01, syslog-java-client, tls-channel and slf4j from the following urls:
+First download jla_01 from following url. The dependencies for jla_01 are now included into the jla_01.jar as shaded ones:
 
 https://search.maven.org/artifact/com.teragrep/jla_01[jla_01]
 
-https://search.maven.org/artifact/com.teragrep/rlp_01[rlp_01]
-
-https://search.maven.org/artifact/com.cloudbees/syslog-java-client[syslog-java-client]
-
-https://mvnrepository.com/artifact/com.github.marianobarrios/tls-channel[tls-channel]
-
-https://mvnrepository.com/artifact/org.slf4j/slf4j-api[slf4j]
-
-Then run java while pointing classpath to the directory where you downloaded the jars to like:
+Then run java while pointing classpath to the directory where you downloaded the jar to like:
 
 ```
-java -cp "path/to/downloaded/jars/*:target/example.jar" com.teragrep.example.Main
+java -cp "path/to/downloaded/jars/jla_01.jar:target/example.jar" com.teragrep.example.Main
 ```
