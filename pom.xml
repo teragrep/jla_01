@@ -47,10 +47,15 @@
 			<artifactId>rlp_01</artifactId>
       <version>3.2.0</version>
 		</dependency>
-		<dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+        <dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.9</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -83,6 +88,7 @@
 			<version>3.6.0</version>
 			<scope>test</scope>
 		</dependency>
+
                 <dependency>
                   <groupId>org.junit.jupiter</groupId>
                   <artifactId>junit-jupiter-engine</artifactId>
@@ -115,6 +121,39 @@
 	<build>
 		<directory>${project.basedir}/target</directory>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.4.1</version>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.teragrep.rlp_01</pattern>
+                                    <shadedPattern>com.teragrep.jla_01.shaded.com.teragrep.rlp_01</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>com.teragrep.jla_01.shaded.org.slf4j</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>tlschannel</pattern>
+                                    <shadedPattern>com.teragrep.jla_01.shaded.tlschannel</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.cloudbees</pattern>
+                                    <shadedPattern>com.teragrep.jla_01.shaded.com.cloudbees</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
@@ -160,7 +199,6 @@
 				<configuration>
 					<parallel>all</parallel>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
-					<parallelTestTimeoutForcedInSeconds>10</parallelTestTimeoutForcedInSeconds>
 				</configuration>
 			</plugin>
                         <plugin>
