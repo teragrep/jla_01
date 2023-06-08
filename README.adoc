@@ -63,6 +63,10 @@ https://search.maven.org/artifact/com.teragrep/rlp_01[rlp_01]
 
 https://search.maven.org/artifact/com.cloudbees/syslog-java-client[syslog-java-client]
 
+https://mvnrepository.com/artifact/com.github.marianobarrios/tls-channel[tls-channel]
+
+https://mvnrepository.com/artifact/org.slf4j/slf4j-api[slf4j]
+
 Then run java while pointing classpath to the directory where you downloaded the jars to like:
 
 ```
