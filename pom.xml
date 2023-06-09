@@ -8,7 +8,7 @@
 	<artifactId>jla_01</artifactId>
         <version>${revision}${sha1}${changelist}</version>
 	<name>jla_01</name>
-	<description>A RELP plugin.</description>
+	<description>Reliable Event Logging Protocol (RELP) Logback plugin</description>
 	<url>https://teragrep.com</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,7 +29,7 @@
 	<developers>
 		<developer>
 			<name>Mikko Kortelainen</name>
-			<email></email>
+			<email>1@teragrep.com</email>
 			<organization>Teragrep</organization>
 			<organizationUrl>https://teragrep.com</organizationUrl>
 		</developer>
@@ -45,12 +45,12 @@
 		<dependency>
 			<groupId>com.teragrep</groupId>
 			<artifactId>rlp_01</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.9</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -160,7 +160,6 @@
 				<configuration>
 					<parallel>all</parallel>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
-					<parallelTestTimeoutForcedInSeconds>10</parallelTestTimeoutForcedInSeconds>
 				</configuration>
 			</plugin>
                         <plugin>
