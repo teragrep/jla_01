@@ -11,6 +11,10 @@
           <artifactId>rlp_01</artifactId>
         </include>
         <include>
+          <groupId>com.teragrep</groupId>
+          <artifactId>tls_01</artifactId>
+        </include>
+        <include>
           <groupId>com.cloudbees</groupId>
           <artifactId>syslog-java-client</artifactId>
         </include>
