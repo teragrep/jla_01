@@ -19,8 +19,10 @@ package com.teragrep.jla_01;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
@@ -30,6 +32,10 @@ import com.cloudbees.syslog.SyslogMessage;
 import com.teragrep.rlp_01.RelpBatch;
 import ch.qos.logback.core.AppenderBase;
 import com.teragrep.rlp_01.RelpConnection;
+import com.teragrep.rlp_01.SSLContextFactory;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 
 public class RlpLogbackAppender<E> extends AppenderBase<E> {
 
@@ -58,6 +64,13 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	private boolean keepAlive = true;
 	private long reconnectIfNoMessagesInterval = 150000;
 	private long lastMessageSent = 0;
+
+	// tls
+	private boolean useTLS = false;
+	private String keystorePath = "";
+	private String keystorePassword = "";
+	private String tlsProtocol = "";
+
 
 	public void setEncoder(LayoutWrappingEncoder encoder) {
 		this.encoder = encoder;
@@ -121,6 +134,23 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 		this.reconnectIfNoMessagesInterval = interval;
 	}
 
+	// tls
+	public void setUseTLS(boolean on) {
+		this.useTLS = on;
+	}
+
+	public void setKeystorePath(String keystorePath) {
+		this.keystorePath = keystorePath;
+	}
+
+	public void setKeystorePassword(String keystorePassword) {
+		this.keystorePassword = keystorePassword;
+	}
+
+	public void setTlsProtocol(String tlsProtocol) {
+		this.tlsProtocol = tlsProtocol;
+	}
+
 	private void connect() {
 		if (System.getenv("JLA01_DEBUG") != null) {
 			System.out.println("RlpLogbackAppender.connect>");
@@ -178,7 +208,29 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 			return;
 
 		// initialize events sender
-		this.sender = new RelpConnection();
+		if (useTLS) {
+			Supplier<SSLEngine> sslEngineSupplier = new Supplier<SSLEngine>() {
+				private final SSLContext sslContext;
+				{
+					try {
+						sslContext = SSLContextFactory.authenticatedContext(keystorePath, keystorePassword, tlsProtocol);
+					} catch (GeneralSecurityException | IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				@Override
+				public SSLEngine get() {
+					return sslContext.createSSLEngine();
+				}
+			};
+
+			this.sender = new RelpConnection(sslEngineSupplier);
+		}
+		else {
+			this.sender = new RelpConnection();
+		}
+
 
 		this.sender.setConnectionTimeout(connectionTimeout);
 		this.sender.setReadTimeout(this.readTimeout);
