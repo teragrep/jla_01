@@ -12,6 +12,11 @@
     <readTimeout>15000</readTimeout>
     <keepAlive>true</keepAlive>
     <reconnectIfNoMessagesInterval>150000</reconnectIfNoMessagesInterval>
+    <!-- tls settings -->
+    <useTLS>false</useTLS>
+    <keystorePath>/path/to/keystore-client.jks</keystorePath>
+    <keystorePassword>changeit</keystorePassword>
+    <tlsProtocol>TLSv1.3</tlsProtocol>
     <encoder>
       <pattern>%-4relative %X{requestId} [%thread] %-5level %logger{35} - %msg</pattern>
     </encoder>
