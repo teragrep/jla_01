@@ -20,10 +20,10 @@ package com.teragrep.jla_01;
 import java.util.Date;
 import java.util.Map;
 
-import com.cloudbees.syslog.Facility;
-import com.cloudbees.syslog.SDElement;
-import com.cloudbees.syslog.Severity;
-import com.cloudbees.syslog.SyslogMessage;
+import com.teragrep.rlo_14.Facility;
+import com.teragrep.rlo_14.SyslogMessage;
+import com.teragrep.rlo_14.SDElement;
+import com.teragrep.rlo_14.Severity;
 
 public class LoggingEventConverter {
 

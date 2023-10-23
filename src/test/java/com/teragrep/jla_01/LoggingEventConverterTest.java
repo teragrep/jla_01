@@ -20,25 +20,15 @@ package com.teragrep.jla_01;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Marker;
-
-import com.cloudbees.syslog.SyslogMessage;
-import com.teragrep.jla_01.LoggingEventConverter;
-
-import ch.qos.logback.classic.Level;
+import com.teragrep.rlo_14.SyslogMessage;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.LoggerContextVO;
 
 public class LoggingEventConverterTest {
 
