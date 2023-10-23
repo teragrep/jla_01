@@ -24,10 +24,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
-import com.cloudbees.syslog.SDElement;
-import com.cloudbees.syslog.SyslogMessage;
+import com.teragrep.rlo_14.SDElement;
+import com.teragrep.rlo_14.SyslogMessage;
 
 import com.teragrep.rlp_01.RelpBatch;
 import ch.qos.logback.core.AppenderBase;
