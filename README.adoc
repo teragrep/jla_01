@@ -1,39 +1,54 @@
 image::https://scan.coverity.com/projects/22709/badge.svg[link=https://scan.coverity.com/projects/jla_01]
 
-# Relp Logging plugin for Logback
+= Relp Logging plugin for Logback
 
 See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logback.example.xml[logback.example.xml] for example config
 
-## Parameters
- * relpHostAddress
- ** Connection destination address
- * relpPort
- ** Connection destination port
- * enableEventId48577
- ** Enables structured data containing uuid and source information
- * appName
- ** Stream application identifier. Maximum length of 48 characters, limited by RFC5424
- * hostname
- ** Stream host identifier. Maximum length of 255 characters, limited by RFC5424
- * connectionTimeout
- ** Time to wait before timing out connection
- * reconnectInterval
- ** Time to wait between re-connection attempts
- * writeTimeout
- ** Time to wait for destination to accept data
- * readTimeout
- ** Time to wait for destination to acknowledge sent data (low values cause duplicates)
- * keepAlive
- ** Enables sending alive packets. Default true.
- * reconnectIfNoMessagesInterval
- ** Reconnects before sending message if at least X milliseconds have passed since last message. Default 150000, set to 0 to turn off automatic reconnections.
+== Parameters
 
-## jboss-module
+|===
+|Parameter |Description
+
+|`relpHostAddress`
+|Connection destination address
+
+|`relpPort`
+|Connection destination port
+
+|`enableEventId48577`
+|Enables structured data containing uuid and source information
+
+|`appName`
+|Stream application identifier. Maximum length of 48 characters, limited by RFC5424
+ 
+|`hostname`
+|Stream host identifier. Maximum length of 255 characters, limited by RFC5424
+ 
+|`connectionTimeout`
+|Time to wait before timing out connection
+ 
+|`reconnectInterval`
+|Time to wait between re-connection attempts
+ 
+|`writeTimeout`
+|Time to wait for destination to accept data
+ 
+|`readTimeout`
+|Time to wait for destination to acknowledge sent data (low values cause duplicates)
+ 
+|`keepAlive`
+|Enables sending alive packets. Default true.
+ 
+|`reconnectIfNoMessagesInterval`
+|Reconnects before sending message if at least X milliseconds have passed since last message. Default 150000, set to 0 to turn off automatic reconnections.
+|===
+
+== jboss-module
 
 These instructions are untested but should work none the less.
 jla_01-1.0.5-jboss-modules.jar contains logback appender for jboss as jboss-module. For generic information about jboss modules, see https://jboss-modules.github.io/jboss-modules/manual/
 
-### Inclusion
+=== Inclusion
 
 Copy the jar into $EAP_HOME/modules.
 
@@ -52,21 +67,38 @@ Include module by using following convetion to target module.xml (which may be q
 One may wish to add this as a global module according to following link in order to avoid multiple inclusions:
 https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.0/html-single/configuration_guide/index#add_a_global_module
 
-
-## Configuring pre-built Logback application
+== Configuring pre-built Logback application
 
 First download wanted versions of jla_01, rlp_01, tls_01 and rlo_14 from the following urls:
 
-https://search.maven.org/artifact/com.teragrep/jla_01[jla_01]
-
-https://search.maven.org/artifact/com.teragrep/rlp_01[rlp_01]
-
-https://search.maven.org/artifact/com.teragrep/tls_01[tls_01]
-
-https://search.maven.org/artifact/com.teragrep/rlo_14[rlo_14]
+* https://search.maven.org/artifact/com.teragrep/jla_01[jla_01]
+* https://search.maven.org/artifact/com.teragrep/rlp_01[rlp_01]
+* https://search.maven.org/artifact/com.teragrep/tls_01[tls_01]
+* https://search.maven.org/artifact/com.teragrep/rlo_14[rlo_14]
 
 Then run java while pointing classpath to the directory where you downloaded the jars to like:
 
 ```
 java -cp "path/to/downloaded/jars/*:target/example.jar" com.teragrep.example.Main
 ```
+
+== Contributing
+ 
+// Change the repository name in the issues link to match with your project's name
+ 
+You can involve yourself with our project by https://github.com/teragrep/jla_01/issues/new/choose[opening an issue] or submitting a pull request.
+ 
+Contribution requirements:
+ 
+. *All changes must be accompanied by a new or changed test.* If you think testing is not required in your pull request, include a sufficient explanation as why you think so.
+. Security checks must pass
+. Pull requests must align with the principles and http://www.extremeprogramming.org/values.html[values] of extreme programming.
+. Pull requests must follow the principles of Object Thinking and Elegant Objects (EO).
+ 
+Read more in our https://github.com/teragrep/teragrep/blob/main/contributing.adoc[Contributing Guideline].
+ 
+=== Contributor License Agreement
+ 
+Contributors must sign https://github.com/teragrep/teragrep/blob/main/cla.adoc[Teragrep Contributor License Agreement] before a pull request is accepted to organization's repositories.
+ 
+You need to submit the CLA only once. After submitting the CLA you can contribute to all Teragrep's repositories. 
