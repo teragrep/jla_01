@@ -36,7 +36,7 @@ import com.teragrep.rlp_01.SSLContextFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
-public class RlpLogbackAppender<E> extends AppenderBase<E> {
+public class RlpLogbackAppender<E> extends AppenderBase<E> implements IRelpAppenderConfig<E> {
 
 	// see also https://stackoverflow.com/questions/31415899/correct-way-to-stop-custom-logback-async-appender
 
@@ -71,47 +71,57 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	private String tlsProtocol = "";
 
 
+	@Override
 	public void setEncoder(LayoutWrappingEncoder encoder) {
 		this.encoder = encoder;
 	}
 
+	@Override
 	public void setSender(RelpConnection sender) {
 		this.sender = sender;
 	}
 
+	@Override
 	public void setRelpPort(int relpPort) {
 		this.relpPort = relpPort;
 	}
 
+	@Override
 	public void setEnableEventId48577(Boolean enableEventId48577) {
 		this.enableEventId48577 = enableEventId48577;
 	}
 
+	@Override
 	public void setRelpHostAddress(String relpHostAddress) {
 		this.relpHostAddress = relpHostAddress;
 	}
 
+	@Override
 	public void setAppName(String appName) {
 		this.appName = appName;
 	}
 
+	@Override
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
 
 	// set connectionTimeout in seconds
+	@Override
 	public void setConnectionTimeout(int timeout) {
 		if (timeout > 0) {
 			this.connectionTimeout = timeout;
 		}
 	}
 
+	@Override
 	public void setWriteTimeout(int timeout) {
 		if (timeout > 0) {
 			this.writeTimeout = timeout;
 		}
 	}
 
+	@Override
 	public void setReadTimeout(int timeout) {
 		if (timeout > 0) {
 			this.readTimeout = timeout;
@@ -119,33 +129,40 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> {
 	}
 
 	//set reconnectInterval in milliseconds
+	@Override
 	public void setReconnectInterval(int interval) {
 		if (interval > 0) {
 			this.reconnectInterval = interval;
 		}
 	}
 
+	@Override
 	public void setKeepAlive(boolean on) {
 		this.keepAlive=on;
 	}
 
+	@Override
 	public void setReconnectIfNoMessagesInterval(int interval) {
 		this.reconnectIfNoMessagesInterval = interval;
 	}
 
 	// tls
+	@Override
 	public void setUseTLS(boolean on) {
 		this.useTLS = on;
 	}
 
+	@Override
 	public void setKeystorePath(String keystorePath) {
 		this.keystorePath = keystorePath;
 	}
 
+	@Override
 	public void setKeystorePassword(String keystorePassword) {
 		this.keystorePassword = keystorePassword;
 	}
 
+	@Override
 	public void setTlsProtocol(String tlsProtocol) {
 		this.tlsProtocol = tlsProtocol;
 	}
