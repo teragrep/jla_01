@@ -83,7 +83,9 @@ public class RlpLogbackAppenderTest {
 			RFC5424Frame rfc5424Frame = new RFC5424Frame();
 			rfc5424Frame.load(new ByteArrayInputStream(message));
 
-			Assertions.assertTrue(rfc5424Frame.next());
+			AtomicBoolean hasNext = new AtomicBoolean();
+			Assertions.assertDoesNotThrow(() -> hasNext.set(rfc5424Frame.next()));
+			Assertions.assertTrue(hasNext.get());
 
 			Assertions.assertEquals("localhost", rfc5424Frame.hostname.toString());
 			Assertions.assertEquals("appName", rfc5424Frame.appName.toString());
