@@ -38,7 +38,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 public class RlpLogbackAppenderTest {
 
 	@Test()
-	public void testDefaultSyslogMessage() throws Exception {
+	public void testDefaultSyslogMessage() {
 		TestServerFactory serverFactory = new TestServerFactory();
 
 		final int serverPort = 22601;
