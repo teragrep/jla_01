@@ -17,7 +17,6 @@
 
 package com.teragrep.jla_01;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
@@ -26,6 +25,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import com.teragrep.rlo_14.SyslogMessage;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -42,7 +43,7 @@ public class LoggingEventConverterTest {
 				"",
 				"");
 		System.out.println(sm.toRfc5424SyslogMessage());
-		assertNotNull(sm);
+		Assertions.assertNotNull(sm);
         
     }
 	

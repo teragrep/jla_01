@@ -17,132 +17,143 @@
 
 package com.teragrep.jla_01;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.io.ByteArrayInputStream;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Ignore;
+import ch.qos.logback.classic.LoggerContext;
+import com.teragrep.jla_01.server.TestServer;
+import com.teragrep.jla_01.server.TestServerFactory;
+import com.teragrep.rlo_06.RFC5424Frame;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.slf4j.Logger;
+import org.junit.jupiter.api.TestInstance;
 import org.slf4j.LoggerFactory;
-
-import com.teragrep.jla_01.RlpLogbackAppender;
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Layout;
-import com.teragrep.rlp_01.RelpConnection;
-import com.teragrep.rlp_01.RelpWindow;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RlpLogbackAppenderTest {
 
+	@Test()
+	public void testDefaultSyslogMessage() {
+		TestServerFactory serverFactory = new TestServerFactory();
+
+		final int serverPort = 22601;
+
+		final ConcurrentLinkedDeque<byte[]> messageList = new ConcurrentLinkedDeque<>();
+		AtomicLong openCount = new AtomicLong();
+		AtomicLong closeCount = new AtomicLong();
+
+		Assertions.assertDoesNotThrow(() -> {
+					try (TestServer server = serverFactory.create(serverPort, messageList, openCount, closeCount)) {
+						server.run();
+
+						ILoggingEvent eventObject = new TestILoggingEvent();
+
+						LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+
+						PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+						encoder.setPattern("%-5level %logger{36} - %msg%n");
+						encoder.setContext(loggerContext);
+						encoder.start();
+
+
+						RlpLogbackAppender<ILoggingEvent> relpAppender = new RlpLogbackAppender<>();
+						relpAppender.setEncoder(encoder);
+						relpAppender.setAppName("appName");
+						relpAppender.setHostname("localhost");
+						relpAppender.setRelpPort(serverPort);
+						relpAppender.start();
+
+						relpAppender.append(eventObject);
+						relpAppender.stop();
+					}
+
+				}
+		);
+
+		Assertions.assertEquals(1, messageList.size(), "messageList size not expected");
+
+
+		for (byte[] message : messageList) {
+			RFC5424Frame rfc5424Frame = new RFC5424Frame();
+			rfc5424Frame.load(new ByteArrayInputStream(message));
+
+			AtomicBoolean hasNext = new AtomicBoolean();
+			Assertions.assertDoesNotThrow(() -> hasNext.set(rfc5424Frame.next()));
+			Assertions.assertTrue(hasNext.get());
+
+			Assertions.assertEquals("localhost", rfc5424Frame.hostname.toString());
+			Assertions.assertEquals("appName", rfc5424Frame.appName.toString());
+			Assertions.assertEquals("DEBUG logger - none\n", rfc5424Frame.msg.toString());
+		}
+
+
+		Assertions.assertTrue (openCount.get() >= 1, "openCount not expected");
+		Assertions.assertEquals(1, closeCount.get(), "closeCount not expected");
+	}
+
+
 	@Test
-	@Ignore
-	public void testRelpOnLocalHost() {
-		Logger logger = LoggerFactory.getLogger("relp");
-		logger.info("relp");
-	}
-
-	/*
-	@Test()
-	public void testDefaultSyslogMessage() throws IllegalStateException, IOException {
-		RelpConnection sender = mock(RelpConnection.class);
-		try (MockedStatic<RelpConnectionInstance> rlpClazz = Mockito.mockStatic(RelpConnectionInstance.class)) {
-			rlpClazz.when(RelpConnectionInstance::getRelpConnection).thenReturn(sender);
-			RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<ILoggingEvent>();
-			adapter.setAppName("appName");
-			adapter.start();
-
-			TestILoggingEvent eventObject = new TestILoggingEvent();
-
-			PatternLayoutEncoder encoder = mock(PatternLayoutEncoder.class);
-			Layout layout = mock(Layout.class);
-			when(encoder.getLayout()).thenReturn(layout);
-			when(layout.doLayout(any())).thenReturn("message");
-			adapter.setEncoder(encoder);
-
-			RelpWindow relpWindow = mock(RelpWindow.class);
-			when(sender.begin()).thenReturn(relpWindow);
-
-			adapter.append(eventObject);
-
-			verify(relpWindow, times(1)).insert(any());
-			try {
-				verify(sender).commit(relpWindow);
-			} catch (TimeoutException e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	@Test()
 	public void testDefaultSyslogMessageWithSDElement() {
-		RelpConnection sender = mock(RelpConnection.class);
-		try (MockedStatic<RelpConnectionInstance> rlpClazz = Mockito.mockStatic(RelpConnectionInstance.class)) {
-			rlpClazz.when(RelpConnectionInstance::getRelpConnection).thenReturn(sender);
-			RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<ILoggingEvent>();
-			adapter.setAppName("appName");
-			adapter.setEnableEventId48577(Boolean.TRUE);
-			adapter.start();
+		TestServerFactory serverFactory = new TestServerFactory();
 
-			TestILoggingEvent eventObject = new TestILoggingEvent();
+		final int serverPort = 22602;
 
-			PatternLayoutEncoder encoder = mock(PatternLayoutEncoder.class);
-			Layout layout = mock(Layout.class);
-			when(encoder.getLayout()).thenReturn(layout);
-			when(layout.doLayout(any())).thenReturn("message");
-			adapter.setEncoder(encoder);
+		final ConcurrentLinkedDeque<byte[]> messageList = new ConcurrentLinkedDeque<>();
+		AtomicLong openCount = new AtomicLong();
+		AtomicLong closeCount = new AtomicLong();
 
-			RelpWindow relpWindow = mock(RelpWindow.class);
-			when(sender.begin()).thenReturn(relpWindow);
+		Assertions.assertDoesNotThrow(() -> {
+					try (TestServer server = serverFactory.create(serverPort, messageList, openCount, closeCount)) {
+						server.run();
 
-			adapter.append(eventObject);
-			verify(relpWindow, times(1)).insert(any());
-			try {
-				verify(sender).commit(relpWindow);
-			} catch (TimeoutException e) {
-				e.printStackTrace();
-			}
 
-		} catch (IllegalStateException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+						TestILoggingEvent eventObject = new TestILoggingEvent();
+
+						LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+						PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+						encoder.setPattern("%-5level %logger{36} - %msg%n");
+						encoder.setContext(loggerContext);
+						encoder.start();
+
+						RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<>();
+						adapter.setEncoder(encoder);
+						adapter.setHostname("host1");
+						adapter.setAppName("appName");
+						adapter.setRelpPort(serverPort);
+						adapter.setEnableEventId48577(Boolean.TRUE);
+						adapter.start();
+
+						adapter.append(eventObject);
+
+						adapter.stop();
+					}
+				}
+		);
+		Assertions.assertEquals(1, messageList.size(), "messageList size not expected");
+
+
+		for (byte[] message : messageList) {
+			RFC5424Frame rfc5424Frame = new RFC5424Frame();
+			rfc5424Frame.load(new ByteArrayInputStream(message));
+
+			AtomicBoolean frameNext = new AtomicBoolean();
+			Assertions.assertDoesNotThrow( () -> {frameNext.set(rfc5424Frame.next());});
+			Assertions.assertTrue(frameNext.get());
+
+			Assertions.assertEquals("host1", rfc5424Frame.hostname.toString());
+			Assertions.assertEquals("appName", rfc5424Frame.appName.toString());
+			Assertions.assertEquals("DEBUG logger - none\n", rfc5424Frame.msg.toString());
 		}
 
+
+		Assertions.assertTrue(openCount.get() >= 1, "openCount not expected");
+		Assertions.assertEquals(1, closeCount.get(), "closeCount not expected");
 	}
-
-	@Test()
-	public void testStopSyncAdapter() {
-		RelpConnection sender = mock(RelpConnection.class);
-		try (MockedStatic<RelpConnectionInstance> rlpClazz = Mockito.mockStatic(RelpConnectionInstance.class)) {
-			rlpClazz.when(RelpConnectionInstance::getRelpConnection).thenReturn(sender);
-			RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<ILoggingEvent>();
-			adapter.setAppName("appName");
-			adapter.setEnableEventId48577(Boolean.TRUE);
-			adapter.start();
-
-			RelpWindow relpWindow = mock(RelpWindow.class);
-			when(sender.begin()).thenReturn(relpWindow);
-			adapter.stop();
-			verify(relpWindow, times(0)).insert(any());
-			try {
-				verify(sender).disconnect();
-			} catch (TimeoutException e) {
-				e.printStackTrace();
-			}
-
-		} catch (IllegalStateException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	 */
 }

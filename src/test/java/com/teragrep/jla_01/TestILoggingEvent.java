@@ -51,13 +51,13 @@ public class TestILoggingEvent implements ILoggingEvent {
 	@Override
 	public Object[] getArgumentArray() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Object[]{};
 	}
 
 	@Override
 	public String getFormattedMessage() {
 		// TODO Auto-generated method stub
-		return null;
+		return "none";
 	}
 
 	@Override
