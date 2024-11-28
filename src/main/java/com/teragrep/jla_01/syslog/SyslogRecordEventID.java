@@ -4,7 +4,7 @@ import com.teragrep.rlo_14.SDElement;
 import com.teragrep.rlo_14.SyslogMessage;
 import java.util.UUID;
 
-public class SyslogRecordEventID implements SyslogRecord {
+public final class SyslogRecordEventID implements SyslogRecord {
 
     private final SyslogRecord syslogRecord;
     private final String hostname;

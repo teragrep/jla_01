@@ -3,7 +3,7 @@ package com.teragrep.jla_01.syslog;
 import com.teragrep.rlo_14.SDElement;
 import com.teragrep.rlo_14.SyslogMessage;
 
-public class SyslogRecordOrigin implements SyslogRecord {
+public final class SyslogRecordOrigin implements SyslogRecord {
 
     private final SyslogRecord syslogRecord;
     private final String hostname;

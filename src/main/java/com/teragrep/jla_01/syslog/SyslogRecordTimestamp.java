@@ -4,7 +4,7 @@ import com.teragrep.rlo_14.SyslogMessage;
 
 import java.time.Instant;
 
-public class SyslogRecordTimestamp implements SyslogRecord {
+public final class SyslogRecordTimestamp implements SyslogRecord {
 
     private final SyslogRecord syslogRecord;
     private final Instant timestamp;

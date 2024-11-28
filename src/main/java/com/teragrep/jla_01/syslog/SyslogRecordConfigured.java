@@ -4,7 +4,7 @@ import com.teragrep.rlo_14.Facility;
 import com.teragrep.rlo_14.Severity;
 import com.teragrep.rlo_14.SyslogMessage;
 
-public class SyslogRecordConfigured implements SyslogRecord {
+public final class SyslogRecordConfigured implements SyslogRecord {
 
     private final String hostname;
     private final String appName;

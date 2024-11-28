@@ -5,7 +5,7 @@ import com.teragrep.rlo_14.SyslogMessage;
 
 import java.util.Map;
 
-public class SyslogRecordMDC implements SyslogRecord {
+public final class SyslogRecordMDC implements SyslogRecord {
 
     private final SyslogRecord syslogRecord;
     private final Map<String, String> mdc;

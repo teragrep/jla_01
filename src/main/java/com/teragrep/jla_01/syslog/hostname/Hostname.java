@@ -3,7 +3,7 @@ package com.teragrep.jla_01.syslog.hostname;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class Hostname {
+public final class Hostname {
     private final String defaultHostname;
 
     public Hostname(final String defaultHostname) {
