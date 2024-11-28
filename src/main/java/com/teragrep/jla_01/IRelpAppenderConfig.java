@@ -58,4 +58,12 @@ public interface IRelpAppenderConfig<E> {
     void setKeystorePassword(String keystorePassword);
 
     void setTlsProtocol(String tlsProtocol);
+
+    void setConnectOnStart(boolean connectOnStart);
+
+    void setRebindEnabled(boolean rebindEnabled);
+
+    void setRebindAmount(int rebindAmount);
+
+    void setSynchronizedAccess(boolean synchronizedAccess);
 }
