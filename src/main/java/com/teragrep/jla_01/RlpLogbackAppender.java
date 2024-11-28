@@ -4,7 +4,6 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
 import com.teragrep.jla_01.syslog.*;
 import com.teragrep.jla_01.syslog.hostname.Hostname;
-import com.teragrep.rlp_01.RelpConnection;
 import com.teragrep.rlp_01.client.*;
 import com.teragrep.rlp_01.pool.Pool;
 import com.teragrep.rlp_01.pool.UnboundPool;
