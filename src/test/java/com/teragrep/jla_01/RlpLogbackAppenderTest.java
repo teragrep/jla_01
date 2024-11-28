@@ -170,7 +170,7 @@ public class RlpLogbackAppenderTest {
 	public void threadedTest() {
 		TestServerFactory serverFactory = new TestServerFactory();
 
-		final int serverPort = 22602;
+		final int serverPort = 22603;
 		final int testCycles = 10_000;
 		final String appName = "someApp";
 		final String hostname = "someHost";
@@ -240,7 +240,7 @@ public class RlpLogbackAppenderTest {
 
 			Assertions.assertEquals(hostname, rfc5424Frame.hostname.toString());
 			Assertions.assertEquals(appName, rfc5424Frame.appName.toString());
-			//System.out.println(rfc5424Frame.msg.toString());
+
 			Matcher matcher = pattern.matcher(rfc5424Frame.msg.toString());
 			boolean matches = matcher.matches();
 			Assertions.assertTrue(matches, "payload unexpected");
