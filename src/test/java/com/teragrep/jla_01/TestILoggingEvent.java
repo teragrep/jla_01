@@ -29,6 +29,12 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggerContextVO;
 
 public class TestILoggingEvent implements ILoggingEvent {
+
+	private final String payload;
+
+	public TestILoggingEvent(String payload) {
+		this.payload = payload;
+	}
 	
 	Map<String, String> mdc = new HashMap<String, String>();
 	Object[] getArgumentArray;
@@ -45,7 +51,7 @@ public class TestILoggingEvent implements ILoggingEvent {
 
 	@Override
 	public String getMessage() {
-		return StringUtils.EMPTY;
+		return payload;
 	}
 
 	@Override
@@ -57,7 +63,7 @@ public class TestILoggingEvent implements ILoggingEvent {
 	@Override
 	public String getFormattedMessage() {
 		// TODO Auto-generated method stub
-		return "none";
+		return payload;
 	}
 
 	@Override
