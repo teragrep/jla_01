@@ -41,7 +41,29 @@ See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logba
  
 |`reconnectIfNoMessagesInterval`
 |Reconnects before sending message if at least X milliseconds have passed since last message. Default 150000, set to 0 to turn off automatic reconnections.
+
+|`connectOnStart`
+|Start one connection initially at appender start. Allows detection of configuration mistakes early.
+
+|`rebindEnabled`
+|Rebind RELP connection after `rebindAmount` of records.
+
+|`rebindAmount`
+|Rebind after this amount of records sent if `rebindEnabled` is set.
+
+|`synchronizedAccess`
+|Allows only one thread at a time to append, therefore uses only one connection.
+
+|`useTLS`
+|Use TLS instead of a plain text connection.
+
+|`keystorePath`
+|Path to Java keystore that includes the CA certificate for the TLS connection
+
+|`keystorePassword`
+|Keystore password for the keystore defined in `keystorePath`
 |===
+
 
 == jboss-module
 
