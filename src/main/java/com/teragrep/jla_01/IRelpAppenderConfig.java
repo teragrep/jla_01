@@ -26,8 +26,6 @@ import com.teragrep.rlp_01.RelpConnection;
 public interface IRelpAppenderConfig<E> {
     void setEncoder(LayoutWrappingEncoder<E> encoder);
 
-    void setSender(RelpConnection sender);
-
     void setRelpPort(int relpPort);
 
     void setEnableEventId48577(Boolean enableEventId48577);
