@@ -24,7 +24,7 @@ import com.teragrep.rlp_01.RelpConnection;
  * @param <E>
  */
 public interface IRelpAppenderConfig<E> {
-    void setEncoder(LayoutWrappingEncoder encoder);
+    void setEncoder(LayoutWrappingEncoder<E> encoder);
 
     void setSender(RelpConnection sender);
 

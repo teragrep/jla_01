@@ -41,7 +41,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> implements IRelpAppen
 	// see also https://stackoverflow.com/questions/31415899/correct-way-to-stop-custom-logback-async-appender
 
 	private RelpConnection sender;
-	private LayoutWrappingEncoder encoder;
+	private LayoutWrappingEncoder<E> encoder;
 
 	// settings for syslog messages
 	private boolean enableEventId48577;
@@ -72,7 +72,7 @@ public class RlpLogbackAppender<E> extends AppenderBase<E> implements IRelpAppen
 
 
 	@Override
-	public void setEncoder(LayoutWrappingEncoder encoder) {
+	public void setEncoder(LayoutWrappingEncoder<E> encoder) {
 		this.encoder = encoder;
 	}
 
