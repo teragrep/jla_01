@@ -251,11 +251,11 @@ public class RlpLogbackAppenderTest {
 
 			int testIteration = Integer.parseInt(testIterationValue);
 
-			Boolean iterationValue = testIterationsMap.get(testIteration);
+			Boolean iterationValue = testIterationsMap.remove(testIteration);
 			Assertions.assertNotNull(iterationValue);
 			Assertions.assertTrue(iterationValue);
 		}
-
+		Assertions.assertTrue(testIterationsMap.isEmpty(), "testIterationsMap was not empty: all messages were sent");
 
 		Assertions.assertTrue( openCount.get() >= 1, "openCount not expected");
 		Assertions.assertTrue(closeCount.get() >= 1, "closeCount not expected");
