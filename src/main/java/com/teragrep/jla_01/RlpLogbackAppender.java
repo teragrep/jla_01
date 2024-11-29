@@ -16,18 +16,15 @@ package com.teragrep.jla_01;
 
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
-import com.teragrep.jla_01.syslog.*;
 import com.teragrep.jla_01.syslog.hostname.Hostname;
 import com.teragrep.rlp_01.client.*;
 import com.teragrep.rlp_01.pool.Pool;
 import com.teragrep.rlp_01.pool.UnboundPool;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 /**
  * Unsynchronized version of RELP Appender for Logback. It is configured in a Bean manner using setters by Logback.
@@ -37,7 +34,6 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
 
     private LayoutWrappingEncoder<E> encoder;
 
-    private String originalHostname;
     private int relpPort;
     private Boolean enableEventId48577;
     private String relpHostAddress;
@@ -60,20 +56,15 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
     private String keystorePassword;
     private String tlsProtocol;
 
-    private Pool<IManagedRelpConnection> relpConnectionPool;
-
-    private final Lock appendLock = new ReentrantLock();
-
     private final Lock beanLock = new ReentrantLock();
 
-    private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicReference<RelpAppender<E>> relpAppenderRef;
 
     public RlpLogbackAppender() {
         // just defaults here
 
         encoder = new LayoutWrappingEncoder<>();
 
-        originalHostname = "";
         relpPort = 601;
         enableEventId48577 = true;
         relpHostAddress = "127.0.0.1";
@@ -95,14 +86,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
         keystorePassword = "";
         tlsProtocol = "TLSv1.3";
 
-        relpConnectionPool = new UnboundPool<>(new Supplier<IManagedRelpConnection>() {
-            @Override
-            public IManagedRelpConnection get() {
-                return new ManagedRelpConnectionStub();
-            }
-        }, new ManagedRelpConnectionStub());
-
-        started.set(false);
+        relpAppenderRef = new AtomicReference<>(new RelpAppenderStub<>());
     }
 
     @Override
@@ -329,7 +313,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
     public void start() {
         beanLock.lock();
         try {
-            originalHostname = new Hostname("").hostname();
+            String originalHostname = new Hostname("").hostname();
 
             boolean maxIdleEnabled = reconnectIfNoMessagesInterval > 0;
 
@@ -344,16 +328,23 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
                 sslContextSupplier = new SSLContextSupplierStub();
             }
 
-            RelpConnectionFactory relpConnectionFactory = new RelpConnectionFactory(relpConfig, socketConfig, sslContextSupplier);
+            RelpConnectionFactory relpConnectionFactory
+                    = new RelpConnectionFactory(relpConfig, socketConfig, sslContextSupplier);
 
-            relpConnectionPool = new UnboundPool<>(relpConnectionFactory, new ManagedRelpConnectionStub());
+            Pool<IManagedRelpConnection> relpConnectionPool = new UnboundPool<>(relpConnectionFactory, new ManagedRelpConnectionStub());
 
             if (connectOnStart) {
                 IManagedRelpConnection managedRelpConnection = relpConnectionPool.get();
                 relpConnectionPool.offer(managedRelpConnection);
             }
 
-            started.set(true);
+            RelpAppender<E> relpAppender = new RelpAppenderImpl<>(relpConnectionPool,hostname, appName, originalHostname, enableEventId48577, encoder);
+
+            if (synchronizedAccess) {
+                relpAppender = new RelpAppenderSynchronized<>(relpAppender);
+            }
+
+            relpAppenderRef.set(relpAppender);
         }
         finally {
             beanLock.unlock();
@@ -363,49 +354,14 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
 
     @Override
     public void stop() {
-        relpConnectionPool.close();
         super.stop();
+        relpAppenderRef.get().stop();
     }
 
     @Override
     protected void append(E iLoggingEvent) {
-
-        if (!started.get()) {
-            throw new IllegalStateException("Appender has not been started");
-        }
-
-        if (synchronizedAccess) {
-            appendLock.lock();
-            try {
-                internalAppend(iLoggingEvent);
-            }
-            finally {
-                appendLock.unlock();
-            }
-        }
-        else {
-            internalAppend(iLoggingEvent);
-        }
+        relpAppenderRef.get().append(iLoggingEvent);
     }
 
-    private void internalAppend(E iLoggingEvent) {
-        {
-            SyslogRecord syslogRecord = new SyslogRecordConfigured(hostname, appName);
-            syslogRecord = new SyslogRecordTimestamp(syslogRecord);
-            syslogRecord = new SyslogRecordOrigin(syslogRecord, originalHostname);
-            if (enableEventId48577) {
-                syslogRecord = new SyslogRecordEventID(syslogRecord, originalHostname);
-            }
 
-            //syslogRecord = new SyslogRecordMDC(syslogRecord, new HashMap<>());
-
-            String payload = encoder.getLayout().doLayout(iLoggingEvent);
-            syslogRecord = new SyslogRecordPayload(syslogRecord, payload);
-
-            IManagedRelpConnection connection = relpConnectionPool.get();
-
-            connection.ensureSent(syslogRecord.getRecord().toRfc5424SyslogMessage().getBytes(StandardCharsets.UTF_8));
-            relpConnectionPool.offer(connection);
-        }
-    }
 }
