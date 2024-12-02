@@ -255,7 +255,7 @@ public class RlpLogbackAppenderTest {
 			Assertions.assertNotNull(iterationValue);
 			Assertions.assertTrue(iterationValue);
 		}
-		Assertions.assertTrue(testIterationsMap.isEmpty(), "testIterationsMap was not empty: all messages were sent");
+		Assertions.assertTrue(testIterationsMap.isEmpty(), "testIterationsMap was not empty: some messages were not delivered successfully");
 
 		Assertions.assertTrue( openCount.get() >= 1, "openCount not expected");
 		Assertions.assertTrue(closeCount.get() >= 1, "closeCount not expected");
