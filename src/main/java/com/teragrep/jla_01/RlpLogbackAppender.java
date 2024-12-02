@@ -315,7 +315,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
         try {
             String originalHostname = new Hostname("").hostname();
 
-            boolean maxIdleEnabled = reconnectIfNoMessagesInterval > 0;
+            boolean maxIdleEnabled = (reconnectIfNoMessagesInterval > 0);
 
             final RelpConfig relpConfig = new RelpConfig(relpHostAddress, relpPort, reconnectInterval, rebindAmount, rebindEnabled, Duration.ofMillis(reconnectIfNoMessagesInterval), maxIdleEnabled);
 
