@@ -17,7 +17,7 @@ public final class Hostname {
         }
         catch (UnknownHostException e) {
             rv = defaultHostname;
-            System.err.println("Could not determine hostname, defaulting to <["+defaultHostname+"}]>");
+            System.err.println("Could not determine hostname, defaulting to <["+defaultHostname+"]>");
         }
         return rv;
     }
