@@ -26,8 +26,6 @@ import com.teragrep.rlp_01.RelpConnection;
 public interface IRelpAppenderConfig<E> {
     void setEncoder(LayoutWrappingEncoder<E> encoder);
 
-    void setSender(RelpConnection sender);
-
     void setRelpPort(int relpPort);
 
     void setEnableEventId48577(Boolean enableEventId48577);
@@ -60,4 +58,12 @@ public interface IRelpAppenderConfig<E> {
     void setKeystorePassword(String keystorePassword);
 
     void setTlsProtocol(String tlsProtocol);
+
+    void setConnectOnStart(boolean connectOnStart);
+
+    void setRebindEnabled(boolean rebindEnabled);
+
+    void setRebindAmount(int rebindAmount);
+
+    void setSynchronizedAccess(boolean synchronizedAccess);
 }

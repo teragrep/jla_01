@@ -1,47 +1,87 @@
 image::https://scan.coverity.com/projects/22709/badge.svg[link=https://scan.coverity.com/projects/jla_01]
 
-= Relp Logging plugin for Logback
+== RELP Logging plugin for Logback
 
 See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logback.example.xml[logback.example.xml] for example config
 
 == Parameters
 
 |===
-|Parameter |Description
+|Parameter |Description | Default
 
 |`relpHostAddress`
 |Connection destination address
+|127.0.0.1
 
 |`relpPort`
 |Connection destination port
+|601
 
 |`enableEventId48577`
 |Enables structured data containing uuid and source information
+|true
 
 |`appName`
 |Stream application identifier. Maximum length of 48 characters, limited by RFC5424
+|jla-01
  
 |`hostname`
 |Stream host identifier. Maximum length of 255 characters, limited by RFC5424
+|localhost.localdomain
  
 |`connectionTimeout`
-|Time to wait before timing out connection
+|Time to wait before timing out connection in milliseconds
+|2500
  
 |`reconnectInterval`
-|Time to wait between re-connection attempts
+|Time to wait between re-connection attempts in milliseconds
+|500
  
 |`writeTimeout`
-|Time to wait for destination to accept data
+|Time to wait for destination to accept data in milliseconds
+|1500
  
 |`readTimeout`
-|Time to wait for destination to acknowledge sent data (low values cause duplicates)
+|Time to wait for destination to acknowledge sent data (low values cause duplicates) in milliseconds
+|1500
  
 |`keepAlive`
-|Enables sending alive packets. Default true.
+|Enables sending alive packets.
+|true
  
 |`reconnectIfNoMessagesInterval`
-|Reconnects before sending message if at least X milliseconds have passed since last message. Default 150000, set to 0 to turn off automatic reconnections.
+|Reconnects before sending message if at least X milliseconds have passed since last message. Set to 0 to turn off automatic reconnections.
+|150000
+
+|`connectOnStart`
+|Start one connection initially at appender start. Allows detection of configuration mistakes early.
+|false
+
+|`rebindEnabled`
+|Rebind RELP connection after `rebindAmount` of records.
+|true
+
+|`rebindAmount`
+|Rebind after this amount of records sent if `rebindEnabled` is set.
+|100000
+
+|`synchronizedAccess`
+|Allows only one thread at a time to append, therefore uses only one connection.
+|false
+
+|`useTLS`
+|Use TLS instead of a plain text connection.
+|false
+
+|`keystorePath`
+|Path to Java keystore that includes the CA certificate for the TLS connection
+|/unset/path/to/keystore
+
+|`keystorePassword`
+|Keystore password for the keystore defined in `keystorePath`
+|
 |===
+
 
 == jboss-module
 

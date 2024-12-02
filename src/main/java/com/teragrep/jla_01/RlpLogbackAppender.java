@@ -1,361 +1,367 @@
 /*
    Reliable Event Logging Protocol (RELP) Logback plugin
    Copyright (C) 2021-2024  Suomen Kanuuna Oy
-  
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
    http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
 package com.teragrep.jla_01;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
-
+import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
-import com.teragrep.rlo_14.SDElement;
-import com.teragrep.rlo_14.SyslogMessage;
+import com.teragrep.jla_01.syslog.hostname.Hostname;
+import com.teragrep.rlp_01.client.*;
+import com.teragrep.rlp_01.pool.Pool;
+import com.teragrep.rlp_01.pool.UnboundPool;
 
-import com.teragrep.rlp_01.RelpBatch;
-import ch.qos.logback.core.AppenderBase;
-import com.teragrep.rlp_01.RelpConnection;
-import com.teragrep.rlp_01.SSLContextFactory;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
+/**
+ * Unsynchronized version of RELP Appender for Logback. It is configured in a Bean manner using setters by Logback.
+ * @param <E>
+ */
+public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> implements IRelpAppenderConfig<E> {
 
-public class RlpLogbackAppender<E> extends AppenderBase<E> implements IRelpAppenderConfig<E> {
+    private LayoutWrappingEncoder<E> encoder;
 
-	// see also https://stackoverflow.com/questions/31415899/correct-way-to-stop-custom-logback-async-appender
-
-	private RelpConnection sender;
-	private LayoutWrappingEncoder<E> encoder;
-
-	// settings for syslog messages
-	private boolean enableEventId48577;
-	private String hostname = "";
-	private String appName = "";
-	private String realHostname = "";
-
-	// settings for relp window
-	private String relpHostAddress = "localhost";
-	private int relpPort = 1234;
-	
-	//
-	//settings for timeouts, if they are 0 that we skip them
-	//default are 0
-	private int connectionTimeout = 0;
-	private int readTimeout = 0;
-	private int writeTimeout = 0;
-	private int reconnectInterval = 500;
-	private boolean keepAlive = true;
-	private long reconnectIfNoMessagesInterval = 150000;
-	private long lastMessageSent = 0;
-
-	// tls
-	private boolean useTLS = false;
-	private String keystorePath = "";
-	private String keystorePassword = "";
-	private String tlsProtocol = "";
+    private int relpPort;
+    private Boolean enableEventId48577;
+    private String relpHostAddress;
+    private String appName;
+    private String hostname;
+    private int connectionTimeout;
+    private int writeTimeout;
+    private int readTimeout;
+    private int reconnectInterval;
+    private boolean keepAliveEnabled;
+    private int reconnectIfNoMessagesInterval;
+    private boolean connectOnStart;
+    private boolean rebindEnabled;
+    private int rebindAmount;
+    private boolean synchronizedAccess;
 
 
-	@Override
-	public void setEncoder(LayoutWrappingEncoder<E> encoder) {
-		this.encoder = encoder;
-	}
+    private boolean useTls;
+    private String keystorePath;
+    private String keystorePassword;
+    private String tlsProtocol;
 
-	@Override
-	public void setSender(RelpConnection sender) {
-		this.sender = sender;
-	}
+    private final Lock beanLock = new ReentrantLock();
 
-	@Override
-	public void setRelpPort(int relpPort) {
-		this.relpPort = relpPort;
-	}
+    private final AtomicReference<RelpAppender<E>> relpAppenderRef;
 
-	@Override
-	public void setEnableEventId48577(Boolean enableEventId48577) {
-		this.enableEventId48577 = enableEventId48577;
-	}
+    public RlpLogbackAppender() {
+        // just defaults here
 
-	@Override
-	public void setRelpHostAddress(String relpHostAddress) {
-		this.relpHostAddress = relpHostAddress;
-	}
+        encoder = new LayoutWrappingEncoder<>();
 
-	@Override
-	public void setAppName(String appName) {
-		this.appName = appName;
-	}
+        relpPort = 601;
+        enableEventId48577 = true;
+        relpHostAddress = "127.0.0.1";
+        appName = "jla-01";
+        hostname = "localhost.localdomain";
+        connectionTimeout = 2500;
+        writeTimeout = 1500;
+        readTimeout = 1500;
+        reconnectInterval = 500;
+        keepAliveEnabled = true;
+        reconnectIfNoMessagesInterval = 150000;
+        connectOnStart = false;
+        rebindEnabled = true;
+        rebindAmount = 100000;
+        synchronizedAccess = false;
 
-	@Override
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
+        useTls = false;
+        keystorePath = "/unset/path/to/keystore";
+        keystorePassword = "";
+        tlsProtocol = "TLSv1.3";
 
-	// set connectionTimeout in seconds
-	@Override
-	public void setConnectionTimeout(int timeout) {
-		if (timeout > 0) {
-			this.connectionTimeout = timeout;
-		}
-	}
+        relpAppenderRef = new AtomicReference<>(new RelpAppenderStub<>());
+    }
 
-	@Override
-	public void setWriteTimeout(int timeout) {
-		if (timeout > 0) {
-			this.writeTimeout = timeout;
-		}
-	}
+    @Override
+    public void setEncoder(LayoutWrappingEncoder<E> encoder) {
+        beanLock.lock();
+        try {
+            this.encoder = encoder;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	@Override
-	public void setReadTimeout(int timeout) {
-		if (timeout > 0) {
-			this.readTimeout = timeout;
-		}
-	}
+    @Override
+    public void setRelpPort(int relpPort) {
+        beanLock.lock();
+        try {
+            this.relpPort = relpPort;
+        }
+        finally {
+            beanLock.lock();
+        }
+    }
 
-	//set reconnectInterval in milliseconds
-	@Override
-	public void setReconnectInterval(int interval) {
-		if (interval > 0) {
-			this.reconnectInterval = interval;
-		}
-	}
+    @Override
+    public void setEnableEventId48577(Boolean enableEventId48577) {
+        beanLock.lock();
+        try {
+            this.enableEventId48577 = enableEventId48577;
+        }
+        finally {
+            beanLock.lock();
+        }
+    }
 
-	@Override
-	public void setKeepAlive(boolean on) {
-		this.keepAlive=on;
-	}
+    @Override
+    public void setRelpHostAddress(String relpHostAddress) {
+        beanLock.lock();
+        try {
+            this.relpHostAddress = relpHostAddress;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	@Override
-	public void setReconnectIfNoMessagesInterval(int interval) {
-		this.reconnectIfNoMessagesInterval = interval;
-	}
+    @Override
+    public void setAppName(String appName) {
+        beanLock.lock();
+        try {
+            this.appName = appName;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	// tls
-	@Override
-	public void setUseTLS(boolean on) {
-		this.useTLS = on;
-	}
+    @Override
+    public void setHostname(String hostname) {
+        beanLock.lock();
+        try {
+            this.hostname = hostname;
+        }
+        finally {
+            beanLock.lock();
+        }
+    }
 
-	@Override
-	public void setKeystorePath(String keystorePath) {
-		this.keystorePath = keystorePath;
-	}
+    @Override
+    public void setConnectionTimeout(int timeout) {
+        beanLock.lock();
+        try {
+            this.connectionTimeout = timeout;
+        }
+        finally {
+            beanLock.lock();
+        }
+    }
 
-	@Override
-	public void setKeystorePassword(String keystorePassword) {
-		this.keystorePassword = keystorePassword;
-	}
+    @Override
+    public void setWriteTimeout(int timeout) {
+        beanLock.lock();
+        try {
+            this.writeTimeout = timeout;
+        }
+        finally {
+            beanLock.lock();
+        }
+    }
 
-	@Override
-	public void setTlsProtocol(String tlsProtocol) {
-		this.tlsProtocol = tlsProtocol;
-	}
+    @Override
+    public void setReadTimeout(int timeout) {
+        beanLock.lock();
+        try {
+            this.readTimeout = timeout;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	private void connect() {
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.connect>");
-		}
+    @Override
+    public void setReconnectInterval(int interval) {
+        beanLock.lock();
+        try {
+            this.reconnectInterval = interval;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-		boolean notConnected = true;
-		while (notConnected) {
-			boolean connected = false;
-			try {
-				realHostname = java.net.InetAddress.getLocalHost().getHostName();
-				connected = this.sender.connect(this.relpHostAddress, this.relpPort);
-			} catch (Exception e) {
-				System.out.println("RlpLogbackAppender.connect> reconnecting to relp server <["+relpHostAddress+"]> at port <["+relpPort+"]> after <[" + reconnectInterval + "]> milliseconds due to exception <" + e.getMessage() +">");
-			}
-			if (connected) {
-				notConnected = false;
-			} else {
-				try {
-					Thread.sleep(this.reconnectInterval);
-				} catch (InterruptedException e) {
-					System.out.println("RlpLogbackAppender.connect> reconnect timer interrupted, reconnecting now");
-				}
-			}
-		}
-	}
+    @Override
+    public void setKeepAlive(boolean on) {
+        beanLock.lock();
+        try {
+            this.keepAliveEnabled = on;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	private void tearDown() {
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.tearDown>");
-		}
-		this.sender.tearDown();
-	}
+    @Override
+    public void setReconnectIfNoMessagesInterval(int interval) {
+        beanLock.lock();
+        try {
+            this.reconnectIfNoMessagesInterval = interval;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	private void disconnect() {
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.disconnect>");
-		}
-		boolean disconnected = false;
-		try {
-			disconnected = this.sender.disconnect();
-		} catch (IllegalStateException | IOException | TimeoutException e) {
-			System.out.println("RlpLogbackAppender.disconnect> forcefully closing connection due to exception <" + e.getMessage() + ">");
-		}
-		finally {
-			this.tearDown();
-		}
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.disconnect> disconnected: " + disconnected);
-		}
-	}
+    @Override
+    public void setUseTLS(boolean on) {
+        beanLock.lock();
+        try {
+            this.useTls = on;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-	@Override
-	public void start() {
-		if (started)
-			return;
+    @Override
+    public void setKeystorePath(String keystorePath) {
+        beanLock.lock();
+        try {
+            this.keystorePath = keystorePath;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-		// initialize events sender
-		if (useTLS) {
-			Supplier<SSLEngine> sslEngineSupplier = new Supplier<SSLEngine>() {
-				private final SSLContext sslContext;
-				{
-					try {
-						sslContext = SSLContextFactory.authenticatedContext(keystorePath, keystorePassword, tlsProtocol);
-					} catch (GeneralSecurityException | IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
+    @Override
+    public void setKeystorePassword(String keystorePassword) {
+        beanLock.lock();
+        try {
+            this.keystorePassword = keystorePassword;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-				@Override
-				public SSLEngine get() {
-					return sslContext.createSSLEngine();
-				}
-			};
+    @Override
+    public void setTlsProtocol(String tlsProtocol) {
+        beanLock.lock();
+        try {
+            this.tlsProtocol = tlsProtocol;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-			this.sender = new RelpConnection(sslEngineSupplier);
-		}
-		else {
-			this.sender = new RelpConnection();
-		}
+    @Override
+    public void setConnectOnStart(boolean connectOnStart) {
+        beanLock.lock();
+        try {
+            this.connectOnStart = connectOnStart;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
+    @Override
+    public void setRebindEnabled(boolean rebindEnabled) {
+        beanLock.lock();
+        try {
+            this.rebindEnabled = rebindEnabled;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-		this.sender.setConnectionTimeout(connectionTimeout);
-		this.sender.setReadTimeout(this.readTimeout);
-		this.sender.setWriteTimeout(this.writeTimeout);
-		this.sender.setKeepAlive(this.keepAlive);
+    @Override
+    public void setRebindAmount(int rebindAmount) {
+        beanLock.lock();
+        try {
+            this.rebindAmount = rebindAmount;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
-		this.connect();
-		super.start();
-	}
+    @Override
+    public void setSynchronizedAccess(boolean synchronizedAccess) {
+        beanLock.lock();
+        try {
+            this.synchronizedAccess = synchronizedAccess;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
 
+    @Override
+    public void start() {
+        beanLock.lock();
+        try {
+            String originalHostname = new Hostname("").hostname();
 
+            boolean maxIdleEnabled = (reconnectIfNoMessagesInterval > 0);
 
-	@Override
-	public void stop() {
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.stop>");
-		}
-		if (!started)
-			return;
+            final RelpConfig relpConfig = new RelpConfig(relpHostAddress, relpPort, reconnectInterval, rebindAmount, rebindEnabled, Duration.ofMillis(reconnectIfNoMessagesInterval), maxIdleEnabled);
 
-		this.disconnect();
-		super.stop();
-	}
+            final SocketConfig socketConfig = new SocketConfigImpl(readTimeout, writeTimeout, connectionTimeout, keepAliveEnabled);
 
-	@Override
-	protected void append(E eventObject) {
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.append> entry");
-		}
-		String logMessage = encoder.getLayout().doLayout(eventObject);
+            final SSLContextSupplier sslContextSupplier;
+            if (useTls) {
+                sslContextSupplier = new SSLContextSupplierKeystore(keystorePath, keystorePassword, tlsProtocol);
+            } else {
+                sslContextSupplier = new SSLContextSupplierStub();
+            }
 
-		if (logMessage == null) {
-			throw new IllegalArgumentException("layout not able to encode event to string");
-		}
+            RelpConnectionFactory relpConnectionFactory
+                    = new RelpConnectionFactory(relpConfig, socketConfig, sslContextSupplier);
 
-		final RelpBatch relpBatch = new RelpBatch();
+            Pool<IManagedRelpConnection> relpConnectionPool = new UnboundPool<>(relpConnectionFactory, new ManagedRelpConnectionStub());
 
-		if (enableEventId48577) {
-			final SDElement event_id_48577 = eventId48577();
-			final SDElement origin_48577 = origin48577();
-			SyslogMessage sl = LoggingEventConverter.getDefaultSyslogMessageWithSDElement(logMessage, appName, hostname,
-					event_id_48577);
-			sl.withSDElement(origin_48577);
-			relpBatch.insert(sl.toRfc5424SyslogMessage().getBytes(StandardCharsets.UTF_8));
-		} else {
-			SyslogMessage sl = LoggingEventConverter.getDefaultSyslogMessage(logMessage, appName, hostname);
-			relpBatch.insert(sl.toRfc5424SyslogMessage().getBytes(StandardCharsets.UTF_8));
-		}
+            if (connectOnStart) {
+                IManagedRelpConnection managedRelpConnection = relpConnectionPool.get();
+                relpConnectionPool.offer(managedRelpConnection);
+            }
 
-		boolean notSent = true;
-		if (
-				reconnectIfNoMessagesInterval > 0 &&
-				System.currentTimeMillis() > (lastMessageSent + reconnectIfNoMessagesInterval)
-		) {
-			this.tearDown();
-			this.connect();
-		}
-		while (notSent) {
-			try {
-				this.sender.commit(relpBatch);
-			} catch (IllegalStateException | IOException | java.util.concurrent.TimeoutException e) {
-				System.out.println("RlpLogbackAppender.append> will retry sending due to exception <" + e.getMessage() + ">");
-			}
+            RelpAppender<E> relpAppender = new RelpAppenderImpl<>(relpConnectionPool,hostname, appName, originalHostname, enableEventId48577, encoder);
 
-			if (!relpBatch.verifyTransactionAll()) {
-				relpBatch.retryAllFailed();
-				this.tearDown();
-				this.connect();
-			} else {
-				notSent = false;
-			}
-		}
-		lastMessageSent = System.currentTimeMillis();
-		if (System.getenv("JLA01_DEBUG") != null) {
-			System.out.println("RlpLogbackAppender.append> exit");
-		}
-	}
+            if (synchronizedAccess) {
+                relpAppender = new RelpAppenderSynchronized<>(relpAppender);
+            }
 
+            relpAppenderRef.set(relpAppender);
+        }
+        finally {
+            beanLock.unlock();
+        }
+        super.start();
+    }
 
-	private SDElement eventId48577() {
-		final SDElement event_id_48577 = new SDElement("event_id@48577");
-		if (realHostname != null) {
-			event_id_48577.addSDParam("hostname", realHostname);
-		}
-                else {
-			event_id_48577.addSDParam("hostname", "");
-                }
+    @Override
+    public void stop() {
+        super.stop();
+        relpAppenderRef.get().stop();
+    }
 
-		String uuid = UUID.randomUUID().toString();
-		event_id_48577.addSDParam("uuid", uuid);
-		event_id_48577.addSDParam("source", "source");
-
-		long unixtime = System.currentTimeMillis();
-		String epochtime = Long.toString(unixtime);
-		event_id_48577.addSDParam("unixtime", epochtime);
-		return event_id_48577;
-
-	}
+    @Override
+    protected void append(E iLoggingEvent) {
+        relpAppenderRef.get().append(iLoggingEvent);
+    }
 
 
-	private SDElement origin48577() {
-		final SDElement origin_48577 = new SDElement("origin@48577");
-		if (realHostname != null) {
-			origin_48577.addSDParam("hostname", realHostname);
-		}
-		else {
-			origin_48577.addSDParam("hostname", "");
-		}
-
-		return origin_48577;
-	}
 }
