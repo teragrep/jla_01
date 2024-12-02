@@ -77,7 +77,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
         keepAliveEnabled = true;
         reconnectIfNoMessagesInterval = 150000;
         connectOnStart = false;
-        rebindEnabled = false;
+        rebindEnabled = true;
         rebindAmount = 100000;
         synchronizedAccess = false;
 

@@ -59,7 +59,7 @@ See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logba
 
 |`rebindEnabled`
 |Rebind RELP connection after `rebindAmount` of records.
-|false
+|true
 
 |`rebindAmount`
 |Rebind after this amount of records sent if `rebindEnabled` is set.
