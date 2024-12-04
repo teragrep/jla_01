@@ -97,6 +97,11 @@ public class RlpLogbackAppenderTest {
 
 			Assertions.assertEquals("localhost", rfc5424Frame.hostname.toString());
 			Assertions.assertEquals("appName", rfc5424Frame.appName.toString());
+
+			Pattern timestampPattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z");
+
+			Assertions.assertTrue(timestampPattern.matcher(rfc5424Frame.timestamp.toString()).matches());
+
 			Assertions.assertEquals("DEBUG logger - "+testPayload+"\n", rfc5424Frame.msg.toString());
 		}
 
