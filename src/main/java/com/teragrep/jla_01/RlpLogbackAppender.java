@@ -111,7 +111,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
             this.relpPort = relpPort;
         }
         finally {
-            beanLock.lock();
+            beanLock.unlock();
         }
     }
 
@@ -122,7 +122,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
             this.enableEventId48577 = enableEventId48577;
         }
         finally {
-            beanLock.lock();
+            beanLock.unlock();
         }
     }
 
@@ -155,7 +155,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
             this.hostname = hostname;
         }
         finally {
-            beanLock.lock();
+            beanLock.unlock();
         }
     }
 
@@ -166,7 +166,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
             this.connectionTimeout = timeout;
         }
         finally {
-            beanLock.lock();
+            beanLock.unlock();
         }
     }
 
@@ -177,7 +177,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
             this.writeTimeout = timeout;
         }
         finally {
-            beanLock.lock();
+            beanLock.unlock();
         }
     }
 
