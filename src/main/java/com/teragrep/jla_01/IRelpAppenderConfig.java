@@ -66,4 +66,9 @@ public interface IRelpAppenderConfig<E> {
     void setRebindAmount(int rebindAmount);
 
     void setSynchronizedAccess(boolean synchronizedAccess);
+
+
+    void setEnableSystemID(boolean enableSystemID);
+
+    void setSystemID(String systemID);
 }

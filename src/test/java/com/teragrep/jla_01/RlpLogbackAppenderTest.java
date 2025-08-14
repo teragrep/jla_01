@@ -32,6 +32,7 @@ import ch.qos.logback.classic.LoggerContext;
 import com.teragrep.jla_01.server.TestServer;
 import com.teragrep.jla_01.server.TestServerFactory;
 import com.teragrep.rlo_06.RFC5424Frame;
+import com.teragrep.rlo_06.SDVector;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -166,6 +167,119 @@ public class RlpLogbackAppenderTest {
 			Assertions.assertEquals("DEBUG logger - "+testPayload+"\n", rfc5424Frame.msg.toString());
 		}
 
+
+		Assertions.assertEquals(1, openCount.get(), "openCount not expected");
+		Assertions.assertEquals(1, closeCount.get(), "closeCount not expected");
+	}
+
+	@Test
+	public void testSystemIDEnabled() {
+		TestServerFactory serverFactory = new TestServerFactory();
+
+		final int serverPort = 22603;
+		final String testPayload = "test string two";
+
+		final ConcurrentLinkedDeque<byte[]> messageList = new ConcurrentLinkedDeque<>();
+		AtomicLong openCount = new AtomicLong();
+		AtomicLong closeCount = new AtomicLong();
+
+		Assertions.assertDoesNotThrow(() -> {
+					try (TestServer server = serverFactory.create(serverPort, messageList, openCount, closeCount)) {
+						server.run();
+
+
+						TestILoggingEvent eventObject = new TestILoggingEvent(testPayload);
+
+						LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+						PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+						encoder.setPattern("%-5level %logger{36} - %msg%n");
+						encoder.setContext(loggerContext);
+						encoder.start();
+
+						RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<>();
+						adapter.setEncoder(encoder);
+						adapter.setHostname("host1");
+						adapter.setAppName("appName");
+						adapter.setRelpPort(serverPort);
+						adapter.setEnableEventId48577(Boolean.FALSE);
+						adapter.setEnableSystemID(Boolean.TRUE);
+						adapter.setSystemID("test-system-ci");
+						adapter.start();
+
+						adapter.append(eventObject);
+
+						adapter.stop();
+					}
+				}
+		);
+		Assertions.assertEquals(1, messageList.size(), "messageList size not expected");
+
+		RFC5424Frame rfc5424Frame = new RFC5424Frame();
+		rfc5424Frame.load(new ByteArrayInputStream(messageList.getFirst()));
+
+		AtomicBoolean frameNext = new AtomicBoolean();
+		Assertions.assertDoesNotThrow( () -> {frameNext.set(rfc5424Frame.next());});
+		Assertions.assertTrue(frameNext.get());
+
+		Assertions.assertEquals("test-system-ci", rfc5424Frame.structuredData.getValue(new SDVector("businessSystem@48577", "systemId")).toString());
+
+
+		Assertions.assertEquals(1, openCount.get(), "openCount not expected");
+		Assertions.assertEquals(1, closeCount.get(), "closeCount not expected");
+	}
+
+	@Test
+	public void testSystemIDDisabled() {
+		TestServerFactory serverFactory = new TestServerFactory();
+
+		final int serverPort = 22604;
+		final String testPayload = "test string two";
+
+		final ConcurrentLinkedDeque<byte[]> messageList = new ConcurrentLinkedDeque<>();
+		AtomicLong openCount = new AtomicLong();
+		AtomicLong closeCount = new AtomicLong();
+
+		Assertions.assertDoesNotThrow(() -> {
+					try (TestServer server = serverFactory.create(serverPort, messageList, openCount, closeCount)) {
+						server.run();
+
+
+						TestILoggingEvent eventObject = new TestILoggingEvent(testPayload);
+
+						LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+						PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+						encoder.setPattern("%-5level %logger{36} - %msg%n");
+						encoder.setContext(loggerContext);
+						encoder.start();
+
+						RlpLogbackAppender<ILoggingEvent> adapter = new RlpLogbackAppender<>();
+						adapter.setEncoder(encoder);
+						adapter.setHostname("host1");
+						adapter.setAppName("appName");
+						adapter.setRelpPort(serverPort);
+						adapter.setEnableEventId48577(Boolean.FALSE);
+						adapter.setEnableSystemID(Boolean.FALSE);
+						adapter.setSystemID("test-system-ci");
+						adapter.start();
+
+						adapter.append(eventObject);
+
+						adapter.stop();
+					}
+				}
+		);
+		Assertions.assertEquals(1, messageList.size(), "messageList size not expected");
+
+		RFC5424Frame rfc5424Frame = new RFC5424Frame();
+		rfc5424Frame.load(new ByteArrayInputStream(messageList.getFirst()));
+
+		AtomicBoolean frameNext = new AtomicBoolean();
+		Assertions.assertDoesNotThrow( () -> {frameNext.set(rfc5424Frame.next());});
+		Assertions.assertTrue(frameNext.get());
+
+		Assertions.assertTrue(rfc5424Frame.structuredData.getValue(new SDVector("businessSystem@48577", "systemId")).isStub);
 
 		Assertions.assertEquals(1, openCount.get(), "openCount not expected");
 		Assertions.assertEquals(1, closeCount.get(), "closeCount not expected");

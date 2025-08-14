@@ -49,6 +49,8 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
     private boolean rebindEnabled;
     private int rebindAmount;
     private boolean synchronizedAccess;
+    private boolean enableSystemID;
+    private String systemID;
 
 
     private boolean useTls;
@@ -80,6 +82,8 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
         rebindEnabled = true;
         rebindAmount = 100000;
         synchronizedAccess = false;
+        enableSystemID = false;
+        systemID = "";
 
         useTls = false;
         keystorePath = "/unset/path/to/keystore";
@@ -310,6 +314,28 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
     }
 
     @Override
+    public void setEnableSystemID(boolean enableSystemID) {
+        beanLock.lock();
+        try {
+            this.enableSystemID = enableSystemID;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
+
+    @Override
+    public void setSystemID(String systemID) {
+        beanLock.lock();
+        try {
+            this.systemID = systemID;
+        }
+        finally {
+            beanLock.unlock();
+        }
+    }
+
+    @Override
     public void start() {
         beanLock.lock();
         try {
@@ -338,7 +364,7 @@ public final class RlpLogbackAppender<E> extends UnsynchronizedAppenderBase<E> i
                 relpConnectionPool.offer(managedRelpConnection);
             }
 
-            RelpAppender<E> relpAppender = new RelpAppenderImpl<>(relpConnectionPool,hostname, appName, originalHostname, enableEventId48577, encoder);
+            RelpAppender<E> relpAppender = new RelpAppenderImpl<>(relpConnectionPool,hostname, appName, originalHostname, enableEventId48577, enableSystemID, systemID,  encoder);
 
             if (synchronizedAccess) {
                 relpAppender = new RelpAppenderSynchronized<>(relpAppender);

@@ -29,14 +29,18 @@ public final class RelpAppenderImpl<E> implements RelpAppender<E> {
     private final String originalHostname;
     private final boolean enableEventId48577;
     private final LayoutWrappingEncoder<E> encoder;
+    private final boolean enableSystemID;
+    private final String systemID;
 
-    public RelpAppenderImpl(Pool<IManagedRelpConnection> relpConnectionPool, String hostname, String appName, String originalHostname, boolean enableEventId48577, LayoutWrappingEncoder<E> encoder) {
+    public RelpAppenderImpl(Pool<IManagedRelpConnection> relpConnectionPool, String hostname, String appName, String originalHostname, boolean enableEventId48577, boolean enableSystemID, String systemID, LayoutWrappingEncoder<E> encoder) {
         this.relpConnectionPool = relpConnectionPool;
         this.hostname = hostname;
         this.appName = appName;
         this.originalHostname = originalHostname;
         this.enableEventId48577 = enableEventId48577;
         this.encoder = encoder;
+        this.enableSystemID = enableSystemID;
+        this.systemID = systemID;
     }
 
     @Override
@@ -48,7 +52,9 @@ public final class RelpAppenderImpl<E> implements RelpAppender<E> {
             if (enableEventId48577) {
                 syslogRecord = new SyslogRecordEventID(syslogRecord, originalHostname);
             }
-
+            if (enableSystemID) {
+                syslogRecord = new SyslogRecordSystemID(syslogRecord, systemID);
+            }
             //syslogRecord = new SyslogRecordMDC(syslogRecord, new HashMap<>());
 
             String payload = encoder.getLayout().doLayout(iLoggingEvent);
