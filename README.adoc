@@ -80,6 +80,15 @@ See link:https://github.com/teragrep/jla_01/blob/master/src/main/resources/logba
 |`keystorePassword`
 |Keystore password for the keystore defined in `keystorePath`
 |
+
+|`enableSystemID`
+|Enables emission of metadata from `systemID` configuration.
+|
+
+|`systemID`
+|Configurable metadata which inserted into rfc5424 structured-data element `businessSystem@48577` with key `systemId` if `enableSystemID` is set.
+|
+
 |===
 
 
